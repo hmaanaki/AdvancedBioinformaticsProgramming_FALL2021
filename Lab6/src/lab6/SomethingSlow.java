@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import Lab6GUI.SomethingSlowGUI;
+
 public class SomethingSlow implements Runnable{
 	
 	static int num_threads;
@@ -15,7 +17,7 @@ public class SomethingSlow implements Runnable{
 	private final Semaphore semaphore;
 	private static int min_val = 0;
 	private static int max_val = 0;
-	private volatile static boolean completed = true;
+	private volatile static boolean completed;
 	
 	private static final List<Integer> list_of_primes = Collections.synchronizedList(new ArrayList<Integer>());
 	
@@ -32,6 +34,9 @@ public class SomethingSlow implements Runnable{
 				if(i % j == 0) {
 					prime = false;
 				}
+				if(SomethingSlowGUI.cancel_pressed()) {
+					return;
+			}
 			}
 			if(prime & i != 0 & i != 1) {
 				synchronized (list_of_primes) {
@@ -50,7 +55,16 @@ public class SomethingSlow implements Runnable{
 	}
 	
 	public static List<Integer> get_list_of_primes(){
-		return list_of_primes;
+		return Collections.unmodifiableList(list_of_primes);
+	}
+	
+	public static void reinitialize_variables_calculation_main() {
+		num_threads = 0;
+		value_to_factor = 0;
+		min_val = 0;
+		max_val = 0;
+		completed = true;
+		list_of_primes.clear();
 	}
 	
 	public void run() {
@@ -68,20 +82,28 @@ public class SomethingSlow implements Runnable{
 	public static void call_main(int num_threads, int value_to_factor) throws Exception {
 		SomethingSlow.value_to_factor = value_to_factor;
 		SomethingSlow.num_threads = num_threads;
+		
 		main(null);
 	}
 	
 	public static void main(String[] Args) throws Exception{
-		
 		long start_time = System.currentTimeMillis();
+		// Interval spacing is adjusted later
 		int interval_spacing = value_to_factor / num_threads;
 		
 		Semaphore semaphore = new Semaphore(num_threads);
 		
+		// For multithreading prime numbers we will separate the value into intervals
+		// and give each thread an interval to work on
 		ConcurrentMap<Integer, List<Integer>> intervals = new ConcurrentHashMap<Integer, List<Integer>>();
 		for(int i =0; i < num_threads; i++) {
 			min_val = max_val;
 			max_val = min_val + interval_spacing;
+			// Need to make sure the maximum is set correctly
+			if( i == num_threads-1) {
+				max_val += 2;
+			}
+
 			List<Integer> interval = new ArrayList<Integer>();
 			interval.add(min_val);
 			interval.add(max_val);
@@ -97,7 +119,9 @@ public class SomethingSlow implements Runnable{
 		
 		for(int i=0; i<num_threads; i++) {
 			semaphore.acquire();
-		}		
+		}
+		
+		// used to check if the calculations are done
 		completed = false;
 		
 		System.out.println("The total number of primes found is: " + list_of_primes.size());
