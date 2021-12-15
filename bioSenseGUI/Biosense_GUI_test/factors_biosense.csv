@@ -1,0 +1,5 @@
+raw_data_filename,nw_absorbance,enzyme_name,enzyme_activity,substrate_name,substrate_concentration,sample_volume,treatment_time
+BDM_211118_153827.csv,0.6,AChE,10,ACh,15,2,5
+BDM_211123_164045.csv,0.6,AChE,8,ACh,15,2,5
+BDM_211203_112024.csv,0.6,AChE,6,ACh,15,2,5
+BDM_211203_120622.csv,0.6,AChE,4,ACh,15,2,5
