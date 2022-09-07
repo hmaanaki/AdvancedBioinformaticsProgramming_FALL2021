@@ -29,7 +29,8 @@ public class Lab2 {
 		Random random = new Random();
 		
 		while(ellapsedTime < 30000) {
-		
+			
+			System.out.println("You have " + (30 - ellapsedTime/1000) + " seconds remaining!");
 			
 			int n = random.nextInt(20);
 			System.out.println("What is the single letter code for " + FULL_NAMES[n] + "?");
@@ -51,7 +52,6 @@ public class Lab2 {
 			
 			long currentTime = System.currentTimeMillis();
 			ellapsedTime = currentTime - startTime;
-			System.out.println("You have " + (30 - ellapsedTime/1000) + " seconds remaining!");
 		}
 		if(ellapsedTime>= 30000) {
 			System.out.println("Your 30 seconds have passed!");
